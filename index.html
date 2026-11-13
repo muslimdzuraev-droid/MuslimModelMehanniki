@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Механическое движение — интерактивные модели</title>
+<style>
+:root{--bg:#edf2f5;--ink:#12263a;--mute:#4f6272;--acc:#0e7c86;--warm:#d9822b;--panel:#fbfdfe;--line:#cfdbe2}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 "Segoe UI",system-ui,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px}
+h1,h2,h3{font-family:"Iowan Old Style",Georgia,serif;line-height:1.2;margin:0}
+header{padding:56px 0 28px}
+h1{font-size:clamp(2rem,5vw,3.2rem);max-width:15em}
+.def{margin:20px 0 0;max-width:40em;font-size:1.2rem;border-left:4px solid var(--acc);padding-left:16px}
+section{padding:28px 0}
+h2{font-size:1.6rem;margin-bottom:14px}
+.concepts{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.concepts div{border-top:3px solid var(--acc);padding-top:8px}
+.concepts h3{font-size:1.1rem;margin-bottom:4px}
+.concepts p{margin:0;color:var(--mute);font-size:.95rem}
+.types{margin-top:18px;color:var(--mute);max-width:46em}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.tabs button{font:inherit;font-size:.95rem;padding:8px 14px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;cursor:pointer}
+.tabs button[aria-selected=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--warm);outline-offset:2px}
+.lab{display:grid;grid-template-columns:1fr 290px;gap:18px;align-items:start}
+@media(max-width:800px){.lab{grid-template-columns:1fr}}
+canvas{width:100%;display:block;background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
+.ctl{margin-bottom:12px}
+.ctl label{display:flex;justify-content:space-between;font-size:.92rem}
+.ctl output{color:var(--acc);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acc)}
+.row{display:flex;gap:8px;margin:14px 0 8px}
+.row button{flex:1;font:inherit;padding:8px;border-radius:8px;border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer}
+.row button.alt{background:transparent;color:var(--ink)}
+.chk{display:block;font-size:.92rem}
+.read{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;font-size:.88rem;color:var(--mute)}
+.read b{display:block;color:var(--ink);font-size:1.05rem;font-variant-numeric:tabular-nums}
+.expl{margin-top:16px;max-width:46em}
+.expl .f{display:inline-block;background:#dcebee;padding:2px 10px;border-radius:6px;font-family:Consolas,monospace;margin:4px 0}
+footer{padding:30px 0 50px;color:var(--mute);font-size:.9rem}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1>Механическое движение: посмотри и попробуй сам</h1>
+<p class="def">Механическое движение — это изменение положения тела в пространстве относительно других тел с течением времени.</p>
+</header>
+
+<section>
+<h2>Основные понятия</h2>
+<div class="concepts">
+<div><h3>Тело отсчёта</h3><p>Тело, относительно которого описывают движение. Пассажир стоит относительно вагона, но движется относительно перрона.</p></div>
+<div><h3>Траектория</h3><p>Линия, которую описывает тело при движении: прямая, окружность, парабола и другие.</p></div>
+<div><h3>Путь</h3><p>Длина траектории. Это число, оно только растёт и не зависит от направления.</p></div>
+<div><h3>Перемещение</h3><p>Вектор из начальной точки в конечную. Может быть равен нулю, даже если путь большой.</p></div>
+</div>
+<p class="types">По траектории движение бывает прямолинейным и криволинейным. По скорости — равномерным (скорость постоянна) и неравномерным (скорость меняется). Ниже можно изменять параметры и видеть, как меняются траектория, скорость, путь и перемещение.</p>
+</section>
+
+<section>
+<h2>Модели движения</h2>
+<div class="tabs" role="tablist" id="tabs"></div>
+<div class="lab">
+<canvas id="cv"></canvas>
+<div class="panel">
+<div id="ctls"></div>
+<div class="ctl"><label for="spd">Скорость времени <output id="spdo">1×</output></label>
+<input type="range" id="spd" min="0.25" max="3" step="0.25" value="1"></div>
+<label class="chk"><input type="checkbox" id="trail" checked> Показывать траекторию</label>
+<label class="chk"><input type="checkbox" id="vec" checked> Показывать вектор скорости</label>
+<div class="row"><button id="pp">Пауза</button><button id="rs" class="alt">Заново</button></div>
+<div class="read">
+<span>Время<b id="rt">0 с</b></span><span>Скорость<b id="rv">0 м/с</b></span>
+<span>Путь<b id="rp">0 м</b></span><span>Перемещение<b id="rd">0 м</b></span>
+</div>
+</div>
+</div>
+<div class="expl" id="expl"></div>
+</section>
+<footer>Подсказка: поставьте на паузу и меняйте ползунки — модель начнётся заново с новыми параметрами.</footer>
+</div>
+
+<script>
+const R2=Math.PI/180;
+const P=(k,l,min,max,step,val,u)=>({k,l,min,max,step,val,u});
+const MODELS=[
+{name:'Равномерное прямолинейное',view:[40,22],bounded:false,
+ info:'Скорость не меняется, траектория — прямая. Путь и модуль перемещения растут одинаково.',formula:'x = x₀ + v·t',
+ params:[P('v','Скорость',1,15,.5,6,'м/с'),P('d','Направление',0,360,5,30,'°')],
+ pos(t,p){const r=p.d*R2,vx=p.v*Math.cos(r),vy=p.v*Math.sin(r);return{x:20+vx*t,y:11+vy*t,vx,vy}}},
+{name:'Равноускоренное',view:[40,22],bounded:false,
+ info:'Ускорение постоянно, скорость меняется линейно. При отрицательном ускорении тело тормозит, останавливается и возвращается.',formula:'x = x₀ + v₀·t + a·t²/2',
+ params:[P('v','Начальная скорость',0,10,.5,2,'м/с'),P('a','Ускорение',-5,5,.25,1.5,'м/с²'),P('d','Направление',0,360,5,0,'°')],
+ pos(t,p){const r=p.d*R2,s=p.v*t+p.a*t*t/2,w=p.v+p.a*t,c=Math.cos(r),n=Math.sin(r);return{x:6+s*c,y:11+s*n,vx:w*c,vy:w*n,done:t>40}}},
+{name:'Движение по окружности',view:[40,22],bounded:true,
+ info:'Модуль скорости постоянен, но направление всё время меняется, поэтому движение неравномерное по векторам. За полный оборот перемещение равно нулю, а путь равен длине окружности.',formula:'v = ω·R,  T = 2π/ω',
+ params:[P('r','Радиус',2,10,.5,7,'м'),P('w','Угловая скорость (минус — по часовой)',-4,4,.1,1.2,'рад/с')],
+ pos(t,p){const a=p.w*t;return{x:20+p.r*Math.cos(a),y:11+p.r*Math.sin(a),vx:-p.r*p.w*Math.sin(a),vy:p.r*p.w*Math.cos(a)}},
+ deco(c,p,X,Y,s){c.beginPath();c.arc(X(20),Y(11),p.r*s,0,7);c.stroke();c.beginPath();c.moveTo(X(20),Y(11));c.lineTo(this.cx,this.cy);c.stroke()}},
+{name:'Бросок под углом',view:[100,45],bounded:false,
+ info:'По горизонтали движение равномерное, по вертикали равноускоренное. Траектория — парабола. Дальность полёта максимальна при угле 45°.',formula:'x = v·cosα·t,  y = v·sinα·t − g·t²/2',
+ params:[P('v','Скорость',5,35,1,24,'м/с'),P('a','Угол броска',5,85,1,45,'°'),P('g','Ускорение свободного падения',1,20,.1,9.8,'м/с²')],
+ pos(t,p){const r=p.a*R2,vx=p.v*Math.cos(r),vy=p.v*Math.sin(r)-p.g*t;return{x:3+p.v*Math.cos(r)*t,y:p.v*Math.sin(r)*t-p.g*t*t/2,vx,vy,done:t>0.05&&p.v*Math.sin(r)*t-p.g*t*t/2<0}}},
+{name:'Колебания маятника',view:[40,22],bounded:true,
+ info:'Тело движется туда и обратно по дуге. Период зависит от длины нити и g, но не от массы (для малых углов — и не от амплитуды).',formula:'T = 2π·√(L/g)',
+ params:[P('l','Длина нити',4,18,.5,12,'м'),P('a','Амплитуда (угол)',5,80,1,40,'°'),P('g','Ускорение свободного падения',1,20,.1,9.8,'м/с²')],
+ pos(t,p){const w=Math.sqrt(p.g/p.l),a0=p.a*R2,th=a0*Math.cos(w*t),dth=-a0*w*Math.sin(w*t);return{x:20+p.l*Math.sin(th),y:21-p.l*Math.cos(th),vx:p.l*dth*Math.cos(th),vy:p.l*dth*Math.sin(th)}},
+ deco(c,p,X,Y){c.beginPath();c.moveTo(X(20),Y(21));c.lineTo(this.cx,this.cy);c.stroke()}},
+{name:'Сложная траектория',view:[40,22],bounded:true,
+ info:'Тело одновременно колеблется по двум осям с разными частотами. Меняйте частоты и сдвиг фаз — получаются фигуры от эллипса до замысловатых петель.',formula:'x = A·sin(ωₓt),  y = B·sin(ω_y t + φ)',
+ params:[P('A','Размах по x',2,18,1,15,'м'),P('B','Размах по y',2,9,1,8,'м'),P('fx','Частота по x',.5,4,.5,3,'рад/с'),P('fy','Частота по y',.5,4,.5,2,'рад/с'),P('ph','Сдвиг фаз',0,180,5,90,'°')],
+ pos(t,p){const f=p.ph*R2;return{x:20+p.A*Math.sin(p.fx*t),y:11+p.B*Math.sin(p.fy*t+f),vx:p.A*p.fx*Math.cos(p.fx*t),vy:p.B*p.fy*Math.cos(p.fy*t+f)}}}
+];
+
+const cv=document.getElementById('cv'),c=cv.getContext('2d');
+let cur=0,p={},t=0,run=true,trail=[],dist=0,prev=null,start=null,speed=1,s=1,W,H,last=0;
+const $=id=>document.getElementById(id);
+
+function buildTabs(){
+ const tb=$('tabs');
+ MODELS.forEach((m,i)=>{const b=document.createElement('button');b.textContent=m.name;b.setAttribute('role','tab');
+  b.onclick=()=>select(i);tb.appendChild(b)});
+}
+function select(i){
+ cur=i;const m=MODELS[i];
+ [...$('tabs').children].forEach((b,j)=>b.setAttribute('aria-selected',j===i));
+ p={};const box=$('ctls');box.innerHTML='';
+ m.params.forEach(q=>{
+  p[q.k]=q.val;
+  const d=document.createElement('div');d.className='ctl';
+  d.innerHTML=`<label for="p_${q.k}"><span>${q.l}</span><output>${q.val} ${q.u}</output></label><input type="range" id="p_${q.k}" min="${q.min}" max="${q.max}" step="${q.step}" value="${q.val}">`;
+  const inp=d.querySelector('input'),out=d.querySelector('output');
+  inp.oninput=()=>{p[q.k]=+inp.value;out.textContent=inp.value+' '+q.u;reset()};
+  box.appendChild(d);
+ });
+ $('expl').innerHTML=`<h3>${m.name}</h3><p>${m.info}</p><span class="f">${m.formula}</span>`;
+ resize();reset();
+}
+function reset(){t=0;trail=[];dist=0;prev=null;start=null;}
+function resize(){
+ const m=MODELS[cur],[vw,vh]=m.view,dpr=window.devicePixelRatio||1,w=cv.clientWidth;
+ cv.width=w*dpr;cv.height=w*dpr*vh/vw;W=cv.width;H=cv.height;s=W/vw;
+}
+function draw(q){
+ const m=MODELS[cur],[vw,vh]=m.view,X=x=>x*s,Y=y=>H-y*s;
+ c.clearRect(0,0,W,H);
+ c.lineWidth=1;c.strokeStyle='#dde7ec';
+ const gs=vw>50?10:5;
+ for(let x=0;x<=vw;x+=gs){c.beginPath();c.moveTo(X(x),0);c.lineTo(X(x),H);c.stroke()}
+ for(let y=0;y<=vh;y+=gs){c.beginPath();c.moveTo(0,Y(y));c.lineTo(W,Y(y));c.stroke()}
+ c.fillStyle='#7b8e9c';c.font=`${12*(W/700)+6}px sans-serif`;c.fillText('сетка: '+gs+' м',8,H-8);
+ if(cur===3){c.fillStyle='#bfd0d9';c.fillRect(0,Y(0),W,3)}
+ if($('trail').checked&&trail.length>1){
+  c.strokeStyle='#0e7c86';c.lineWidth=2.5*(W/700+.5);c.beginPath();
+  trail.forEach((a,i)=>i?c.lineTo(X(a[0]),Y(a[1])):c.moveTo(X(a[0]),Y(a[1])));c.stroke();
+ }
+ if(start){c.fillStyle='#12263a';c.beginPath();c.arc(X(start.x),Y(start.y),4*(W/700+.5),0,7);c.fill()}
+ if(q){
+  c.strokeStyle='#8aa0ae';c.lineWidth=1.5;
+  if(m.deco){m.cx=X(q.x);m.cy=Y(q.y);c.setLineDash([6,5]);m.deco(c,p,X,Y,s);c.setLineDash([])}
+  if($('vec').checked){
+   const k=.45,ex=q.x+q.vx*k,ey=q.y+q.vy*k;
+   c.strokeStyle='#d9822b';c.fillStyle='#d9822b';c.lineWidth=3;
+   c.beginPath();c.moveTo(X(q.x),Y(q.y));c.lineTo(X(ex),Y(ey));c.stroke();
+   const an=Math.atan2(-(ey-q.y),ex-q.x),h=10*(W/700+.5);
+   c.beginPath();c.moveTo(X(ex),Y(ey));c.lineTo(X(ex)-h*Math.cos(an-.4),Y(ey)-h*Math.sin(an-.4));
+   c.lineTo(X(ex)-h*Math.cos(an+.4),Y(ey)-h*Math.sin(an+.4));c.fill();
+  }
+  c.fillStyle='#0e7c86';c.beginPath();c.arc(X(q.x),Y(q.y),9*(W/700+.5),0,7);c.fill();
+  c.strokeStyle='#fff';c.lineWidth=2;c.stroke();
+ }
+}
+function frame(ts){
+ const dt=Math.min((ts-last)/1000,.05)*speed;last=ts;
+ const m=MODELS[cur],[vw,vh]=m.view;
+ if(run){
+  t+=dt;const q=m.pos(t,p);
+  const out=!m.bounded&&(q.x<-1||q.x>vw+1||q.y<-1||q.y>vh+1);
+  if(q.done||out){
+   if(q.done&&cur===3){q.y=Math.max(q.y,0)}
+   if(!(cur===3&&q.done&&trail.length&&!window._hold)){reset();requestAnimationFrame(frame);return}
+  }
+  if(!start)start={x:q.x,y:q.y};
+  if(prev)dist+=Math.hypot(q.x-prev.x,q.y-prev.y);
+  prev=q;trail.push([q.x,q.y]);if(trail.length>1500)trail.shift();
+  $('rt').textContent=t.toFixed(1)+' с';
+  $('rv').textContent=Math.hypot(q.vx,q.vy).toFixed(1)+' м/с';
+  $('rp').textContent=dist.toFixed(1)+' м';
+  $('rd').textContent=Math.hypot(q.x-start.x,q.y-start.y).toFixed(1)+' м';
+  draw(q);
+ }
+ requestAnimationFrame(frame);
+}
+$('pp').onclick=()=>{run=!run;$('pp').textContent=run?'Пауза':'Старт'};
+$('rs').onclick=reset;
+$('spd').oninput=e=>{speed=+e.target.value;$('spdo').textContent=speed+'×'};
+['trail','vec'].forEach(id=>$(id).onchange=()=>{if(!run){const q=prev;draw(q)}});
+window.addEventListener('resize',()=>{resize();if(!run&&prev)draw(prev)});
+buildTabs();select(0);requestAnimationFrame(frame);
+</script>
+</body>
+</html>
